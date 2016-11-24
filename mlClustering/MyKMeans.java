@@ -47,7 +47,9 @@ public class MyKMeans extends AbstractClusterer implements Clusterer {
             initSeed();
             initClusters();
             boolean isChanged = true;
+            int iteration =0;
             while(isChanged) {
+                iteration++;                                
                 KMeansCluster[] prevClusters = new KMeansCluster[numClusters];
                 for(int i = 0; i<numClusters; i++) {
                     KMeansCluster prevCluster = new KMeansCluster(clusters[i].getMembers(), centroids.instance(i));
@@ -58,6 +60,10 @@ public class MyKMeans extends AbstractClusterer implements Clusterer {
                 isChanged = this.isDifferent(prevClusters);
             }
 	}
+
+	public void printCentroid(){
+	    System.out.println(centroids.toString());
+    }
 
     /**
      * mendapatkan jumlah cluster yang diinginkan
@@ -102,7 +108,7 @@ public class MyKMeans extends AbstractClusterer implements Clusterer {
 		Collections.shuffle(list);
 		for (int i=0; i<numClusters; i++) {
 			int idx =(list.get(i));
-			Instance centroid = dataset.instance(idx);
+			Instance centroid = KMeansCluster.copyInstance(dataset.instance(idx));
 			centroids.add(centroid);
 		}
 	}
@@ -121,16 +127,20 @@ public class MyKMeans extends AbstractClusterer implements Clusterer {
      * menyesuaikan anggota setiap cluster berdasarkan centroid yang ada
      */
 	private void reCluster() {
+	    for(int i = 0; i<numClusters; i++) {
+            clusters[i].clearMembers();
+        }
 		EuclideanDistance euclideanDistance = new EuclideanDistance();
-		euclideanDistance.setInstances(centroids);
-
+                euclideanDistance.setInstances(dataset);
+                
 		try {
 			for (Instance instance: dataset) {
 				int seedIdx = euclideanDistance.closestPoint(instance, centroids, listSeed);
+                                
 				clusters[seedIdx].addMembers(instance);
 			}
 		} catch (Exception e) {
-		    e.printStackTrace();
+                    e.printStackTrace();
 		}
 	}
 
