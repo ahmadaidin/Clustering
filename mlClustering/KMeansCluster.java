@@ -26,8 +26,8 @@ public class KMeansCluster implements WeightedInstancesHandler{
      * @param centroid
      */
     public KMeansCluster(Instances members, Instance centroid) {
-        this.members = members;
-        this.centroid = centroid;
+        this.members = new Instances(members);
+        this.centroid = new DenseInstance(centroid);
     }
 
     /**
@@ -35,7 +35,7 @@ public class KMeansCluster implements WeightedInstancesHandler{
      * @param centroid
      */
     public KMeansCluster(Instance centroid) {
-        this.centroid = centroid;
+        this.centroid = new DenseInstance(centroid);
     }
 
     /**
@@ -96,8 +96,8 @@ public class KMeansCluster implements WeightedInstancesHandler{
      * instance yang diberi bobot ditangani
      * missing attribute value juga ditangani
      */
-    public void moveCentroid(){
-        for (int j = 0; j < centroid.numAttributes(); j++) {
+    public void moveCentroid(){        
+        for (int j = 0; j < centroid.numAttributes(); j++) {            
             centroid.setValue(centroid.attribute(j), members.meanOrMode(j));
         }
     }
@@ -110,9 +110,9 @@ public class KMeansCluster implements WeightedInstancesHandler{
      */
     public boolean isEqual(KMeansCluster cluster) {
         boolean equal = true;
-        int i = 0;
+        int i = 0;              
         while ( equal && i < centroid.numAttributes()) {
-            if (centroid.value(i) != cluster.centroid.value(i)) {
+            if (centroid.value(i) != cluster.centroid.value(i)) {                
                 equal = false;
             }
             i++;
@@ -135,4 +135,13 @@ public class KMeansCluster implements WeightedInstancesHandler{
         return denseInstance;
     }
 
+    public String toString() {
+        String ret = "Element Count = " + this.members.size() + "\n\n";
+        ret += "===========================\n";
+        for (int i = 0 ; i < this.members.size(); i ++) {
+            ret += i+1 + ": [" + this.members.get(i).toString() + "]\n";
+        }        
+        ret += "===========================\n";
+        return ret;
+    }
 }
