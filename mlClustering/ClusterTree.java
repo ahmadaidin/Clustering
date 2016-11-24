@@ -13,12 +13,13 @@ public class ClusterTree <T> {
 	private ArrayList<ClusterTree<T>> childrenNode;
 	private Set<Integer> descendants;
 	private int level;
-	
+	private Set<Integer> nodes;
 	public ClusterTree(int id) {
 		this.id = id;
 		children = new ArrayList<Integer>();
 		setDescendants(new HashSet<Integer>());
 		isLeaf = false;
+		nodes = new HashSet<Integer>();
 		childrenNode = new ArrayList<ClusterTree<T>>();
 		elements = new ArrayList<T>();
 		setLevel(0);
@@ -31,17 +32,20 @@ public class ClusterTree <T> {
 		isLeaf = false;
 		childrenNode = new ArrayList<ClusterTree<T>>();
 		elements = new ArrayList<T>();
+		nodes = new HashSet<Integer>();
 		this.setLevel(level);
 	}
 	
 	public ClusterTree(int id, ArrayList<Integer> children, int level) {
 		this.id = id;
 		this.children = children;
+		nodes = new HashSet<Integer>();
 		setDescendants(new HashSet<Integer>());
 		isLeaf = false;
 		childrenNode = new ArrayList<ClusterTree<T>>();
 		elements = new ArrayList<T>();
 		getDescendants().addAll(children);
+		nodes.addAll(children);
 		this.setLevel(level);
 	}
 	
@@ -51,6 +55,7 @@ public class ClusterTree <T> {
 		this.elements = elements;
 		isLeaf = false;
 		childrenNode = new ArrayList<ClusterTree<T>>();
+		nodes.addAll(children);
 		this.setLevel(level);
 	}
 	
@@ -84,7 +89,6 @@ public class ClusterTree <T> {
 	
 	public void addChildren(int id) {
 		children.add(id);
-		getDescendants().add(id);
 	}
 	
 	public void addElement(T e) {
@@ -125,11 +129,14 @@ public class ClusterTree <T> {
 		ArrayList<Integer> ch = new ArrayList<Integer>();
 		children.clear();
 		descendants.clear();
+		nodes.clear();
 		for(ClusterTree<T> cluster : childrenNode) {
 			ch.add(cluster.getId());
 			addChildren(cluster.getId());
 			getDescendants().add(cluster.getId());
 			getDescendants().addAll(cluster.getDescendants());
+			nodes.add(cluster.getId());
+			nodes.addAll(cluster.getNodes());
 		}
 		this.children = ch;
 	}
@@ -137,8 +144,12 @@ public class ClusterTree <T> {
 	public void addChildrenNode(ClusterTree<T> node) {
 		childrenNode.add(node);
 		addChildren(node.getId());
-		descendants.add(node.getId());
+		if(node.hasElement()) {
+			descendants.add(node.getId());
+		}
 		descendants.addAll(node.getDescendants());
+		nodes.add(node.getId());
+		nodes.addAll(node.getNodes());
 		
 	}
 	
@@ -218,5 +229,49 @@ public class ClusterTree <T> {
 
 	public void setLevel(int level) {
 		this.level = level;
+	}
+
+	public Set<Integer> getNodes() {
+		return nodes;
+	}
+
+	public void setNodes(Set<Integer> nodes) {
+		this.nodes = nodes;
+	}
+	
+	public ClusterTree<T> getNode(int nodeId) {
+		int myid = id;
+		if(myid == nodeId) {
+			return this;
+		} else {
+			boolean found = false;
+			int i = 0;
+			int currId = 0;
+			
+			while(!found && i < childrenNode.size()) {
+				found = contain(nodeId, childrenNode.get(i).getNodes());
+				if(found){
+					myid = childrenNode.get(i).getId();
+					currId = i;
+				}
+				i++;
+				System.out.println(i);
+			}
+			System.out.println(currId);
+			return getChildrenNode().get(currId).getNode(nodeId);
+		}
+	}
+	
+	public boolean contain(int val, Set<Integer> s) {
+		boolean found = false;
+		ArrayList<Integer> arr = new ArrayList<Integer>(s);
+		System.out.println(ArrToString(arr));
+		int i = 0;
+		while(i < s.size() && !found) {
+			found = arr.get(i) == 297;
+			i++;
+		}
+		System.out.println(found);
+		return found;
 	}
 }

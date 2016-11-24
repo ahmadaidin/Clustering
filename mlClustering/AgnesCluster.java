@@ -16,30 +16,36 @@ import weka.core.Instances;
 public class AgnesCluster implements Clusterer {
 	
 	private int numCluster;
-	private ClusterTree<Instance> clusterTree;
+	private ArrayList<ClusterTree<Instance>> clusterTree;
 	private int strategy;
 	private int idManager;
 	private EuclideanDistance edist;
 	int levelMax = 0;
+	private Instances model;
+	//private ArrayList<Integer> clusters;
+	
 	public AgnesCluster() {
-		numCluster = 0;
+		setNumCluster(1);
 		setIdManager(0);
 		strategy = ClusterDist.SINGLE_LINK;
+		clusterTree = new ArrayList<ClusterTree<Instance>>();
 	}
 	
 	public AgnesCluster(int strategy) {
-		numCluster = 0;
+		setNumCluster(1);
 		setIdManager(0);
 		if (strategy == ClusterDist.COMPLETE_LINK) {
 			this.strategy = strategy;
 		} else {
 			this.strategy = ClusterDist.SINGLE_LINK;
 		}
+		clusterTree = new ArrayList<ClusterTree<Instance>>();
 	}
 	
 	@Override
 	public void buildClusterer(Instances arg0) throws Exception {
 		//add all instances to leaf cluster
+		model = arg0;
 		edist = new EuclideanDistance(arg0);
 		ArrayList<ClusterTree<Instance>> treeTab = new ArrayList<ClusterTree<Instance>>();
 		for(int i = 0; i < arg0.size(); i++) {
@@ -48,13 +54,12 @@ public class AgnesCluster implements Clusterer {
 			treeTab.add(cluster);
 			
 		}
-		
 		//next level
 		levelMax++;
 		ArrayList<Integer> removeIdx = new ArrayList<Integer>();
 		Set<Integer> removeSet = new HashSet<Integer>();
 		ArrayList<ClusterTree<Instance>> newTree = new ArrayList<ClusterTree<Instance>>();
-		while(treeTab.size() > 1){
+		while(treeTab.size() > numCluster){
 			//add nearest pairs to newTree
 			ArrayList<KeyPair> pairs = nearestPairs(treeTab);
 			for(KeyPair kp : pairs) {
@@ -62,7 +67,6 @@ public class AgnesCluster implements Clusterer {
 				cluster.addChildrenNode(treeTab.get(kp.getValue1()));
 				cluster.addChildrenNode(treeTab.get(kp.getValue2()));
 				newTree.add(cluster);
-				System.out.println("add " + kp);
 			}
 			
 			//remove from treeTab
@@ -74,7 +78,6 @@ public class AgnesCluster implements Clusterer {
 			Collections.reverse(removeIdx);
 			for(int idx : removeIdx) {
 				treeTab.remove(idx);
-				System.out.println("remove :" + idx);
 			}
 			removeIdx.clear();
 			removeSet.clear();
@@ -84,20 +87,69 @@ public class AgnesCluster implements Clusterer {
 			//next level
 			levelMax++;
 		}
-		clusterTree = treeTab.get(0);
-		numCluster = clusterTree.numNodes();
+		clusterTree.addAll(treeTab);
 	}
-
+	
+	/*
+	public void setWishedCluster(int numCluster) {
+		this.numCluster = numCluster;
+		clusters = new ArrayList<Integer>();
+		ArrayList<ClusterTree<Instance>> trees = new ArrayList<ClusterTree<Instance>>();
+		trees.add(clusterTree);
+		while (trees.size() < numCluster) {
+			//cari cluster dgn member terbanyak
+			int maxIdx = 0;
+			int nMem = 0;
+			int memMax = 0;
+			for(int i = 0; i < trees.size(); i++) {
+				nMem = trees.get(i).getDescendants().size();
+				if(nMem > memMax) {
+					maxIdx = i;
+				}
+			}
+			//expand tree
+			ClusterTree<Instance> tree = trees.remove(maxIdx);
+			trees.add(tree.getChildrenNodeAt(0));
+			trees.add(tree.getChildrenNodeAt(1));
+		}
+		
+		
+		for(int i = 0; i < trees.size(); i++) {
+			clusters.add(trees.get(i).getId());
+		}
+	}
+	*/
 	@Override
 	public int clusterInstance(Instance arg0) throws Exception {
-		// TODO Auto-generated method stub
+		int idxMin = 0;
+		double min = Double.MAX_VALUE;
+		double dist;
+		for(int i = 0; i < model.size(); i++) {
+			dist = edist.distance(arg0, model.get(i));
+			if(dist < min) {
+				idxMin = i;
+				min = dist;
+			}
+		}
+		
+		for(int i = 0; i < numCluster; i++) {
+			if(clusterTree.get(i).getDescendants().contains(idxMin)) {
+				return i;
+			}
+		}
 		return 0;
 	}
 
 	@Override
 	public double[] distributionForInstance(Instance arg0) throws Exception {
-		
-		return null;
+		if (numberOfClusters() == 0) {
+		      double[] p = new double[1];
+		      p[0] = 1;
+		      return p;
+		    }
+		    double[] p = new double[numberOfClusters()];
+		    p[clusterInstance(arg0)] = 1.0;
+		    return p;
 	}
 
 	@Override
@@ -109,12 +161,16 @@ public class AgnesCluster implements Clusterer {
 	@Override
 	public int numberOfClusters() throws Exception {
 		// TODO Auto-generated method stub
-		return numCluster;
+		return getNumCluster();
 	}
 	
 	@Override
 	public String toString() {
-		return clusterTree.toString();
+		String res = "";
+		for(int i = 0; i < clusterTree.size(); i++) {
+			res += clusterTree.toString() + "\n\n";
+		}
+		return res;
 	}
 	
 	public ArrayList<KeyPair> nearestPairs(ArrayList<ClusterTree<Instance>> treeTab) {
@@ -161,7 +217,7 @@ public class AgnesCluster implements Clusterer {
 		return id;
 	}
 	
-	public ClusterTree<Instance> getClusterTree() {
+	public ArrayList<ClusterTree<Instance>> getClusterTree() {
 		return clusterTree;
 	}
 	
@@ -181,7 +237,23 @@ public class AgnesCluster implements Clusterer {
 		}
 	}
 
-	public void setClusterTree(ClusterTree<Instance> clusterTree) {
+	public void setClusterTree(ArrayList<ClusterTree<Instance>> clusterTree) {
 		this.clusterTree = clusterTree;
+	}
+
+	public Instances getModel() {
+		return model;
+	}
+
+	public void setModel(Instances model) {
+		this.model = model;
+	}
+
+	public int getNumCluster() {
+		return numCluster;
+	}
+
+	public void setNumCluster(int numCluster) {
+		this.numCluster = numCluster;
 	}
 }
