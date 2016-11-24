@@ -27,8 +27,8 @@ public class MyKMeans extends AbstractClusterer implements Clusterer {
      * @param numClusters
      */
 	public MyKMeans(int numClusters) {
-		this.numClusters = numClusters;
-		clusters = new KMeansCluster[numClusters];
+            this.numClusters = numClusters;
+            clusters = new KMeansCluster[numClusters];
 	}
 
     /**
@@ -39,29 +39,26 @@ public class MyKMeans extends AbstractClusterer implements Clusterer {
      * @throws Exception
      */
 	public void buildClusterer(Instances instances) throws Exception {
-		this.dataset = instances;
-        attributes = new ArrayList<>();
-		for(int i = 0; i<instances.numAttributes();i++) {
-			attributes.add(dataset.attribute(i));
-		}
-        initSeed();
-        initClusters();
-        boolean isChanged = true;
-        int iteration =0;
-        while(iteration<5) {
-            iteration++;
-            System.out.println("");
-            System.out.println("iterasi: "+iteration);
-            printCentroid();
-            KMeansCluster[] prevClusters = new KMeansCluster[numClusters];
-            for(int i = 0; i<numClusters; i++) {
-                KMeansCluster prevCluster = new KMeansCluster(centroids.instance(i));
-                prevClusters[i] = prevCluster;
+            this.dataset = instances;
+            attributes = new ArrayList<>();
+            for(int i = 0; i<instances.numAttributes();i++) {
+                    attributes.add(dataset.attribute(i));
             }
-            reCluster();
-            updateCentroid();
-            isChanged = this.isDifferent(prevClusters);
-        }
+            initSeed();
+            initClusters();
+            boolean isChanged = true;
+            int iteration =0;
+            while(isChanged) {
+                iteration++;                                
+                KMeansCluster[] prevClusters = new KMeansCluster[numClusters];
+                for(int i = 0; i<numClusters; i++) {
+                    KMeansCluster prevCluster = new KMeansCluster(clusters[i].getMembers(), centroids.instance(i));
+                    prevClusters[i] = prevCluster;
+                }
+                reCluster();
+                updateCentroid();
+                isChanged = this.isDifferent(prevClusters);
+            }
 	}
 
 	public void printCentroid(){
@@ -97,7 +94,7 @@ public class MyKMeans extends AbstractClusterer implements Clusterer {
      * seed dipilih secara acak
      */
 	private void initSeed(){
-	    System.out.println("inisiasi seed");
+	    
 		listSeed = new int[numClusters];
 		for (int i=0;i<numClusters;i++) {
 			listSeed[i]=i;
@@ -134,13 +131,16 @@ public class MyKMeans extends AbstractClusterer implements Clusterer {
             clusters[i].clearMembers();
         }
 		EuclideanDistance euclideanDistance = new EuclideanDistance();
+                euclideanDistance.setInstances(dataset);
+                
 		try {
 			for (Instance instance: dataset) {
 				int seedIdx = euclideanDistance.closestPoint(instance, centroids, listSeed);
+                                
 				clusters[seedIdx].addMembers(instance);
 			}
 		} catch (Exception e) {
-
+                    e.printStackTrace();
 		}
 	}
 
@@ -154,7 +154,7 @@ public class MyKMeans extends AbstractClusterer implements Clusterer {
 		boolean isChanged = false;
 		int i = 0;
 		while(!isChanged && i<numClusters) {
-			if(!this.clusters[i].equals(clusters[i])){
+			if(!this.clusters[i].isEqual(clusters[i])){
 				isChanged = true;
 			}
 			i++;
