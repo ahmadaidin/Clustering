@@ -47,9 +47,7 @@ public class MyKMeans extends AbstractClusterer implements Clusterer {
             initSeed();
             initClusters();
             boolean isChanged = true;
-            int iteration =0;
             while(isChanged) {
-                iteration++;                                
                 KMeansCluster[] prevClusters = new KMeansCluster[numClusters];
                 for(int i = 0; i<numClusters; i++) {
                     KMeansCluster prevCluster = new KMeansCluster(clusters[i].getMembers(), centroids.instance(i));
@@ -168,10 +166,7 @@ public class MyKMeans extends AbstractClusterer implements Clusterer {
     private void updateCentroid(){
         for (int i=0; i<numClusters; i++) {
             clusters[i].moveCentroid();
-            //centroids.remove(i);
-            //centroids.add(i,clusters[i].getCentroid());
         }
     }
-
 
 }
