@@ -82,6 +82,10 @@ public class KMeansCluster implements WeightedInstancesHandler{
         return members;
     }
 
+    public int size(){
+        return members.size();
+    }
+
     /**
      * mendapatkan cetroid dari cluster
      * @return Instance
