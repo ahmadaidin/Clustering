@@ -90,35 +90,6 @@ public class AgnesCluster implements Clusterer {
 		clusterTree.addAll(treeTab);
 	}
 	
-	/*
-	public void setWishedCluster(int numCluster) {
-		this.numCluster = numCluster;
-		clusters = new ArrayList<Integer>();
-		ArrayList<ClusterTree<Instance>> trees = new ArrayList<ClusterTree<Instance>>();
-		trees.add(clusterTree);
-		while (trees.size() < numCluster) {
-			//cari cluster dgn member terbanyak
-			int maxIdx = 0;
-			int nMem = 0;
-			int memMax = 0;
-			for(int i = 0; i < trees.size(); i++) {
-				nMem = trees.get(i).getDescendants().size();
-				if(nMem > memMax) {
-					maxIdx = i;
-				}
-			}
-			//expand tree
-			ClusterTree<Instance> tree = trees.remove(maxIdx);
-			trees.add(tree.getChildrenNodeAt(0));
-			trees.add(tree.getChildrenNodeAt(1));
-		}
-		
-		
-		for(int i = 0; i < trees.size(); i++) {
-			clusters.add(trees.get(i).getId());
-		}
-	}
-	*/
 	@Override
 	public int clusterInstance(Instance arg0) throws Exception {
 		int idxMin = 0;
