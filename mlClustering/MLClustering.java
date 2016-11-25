@@ -21,20 +21,20 @@ public class MLClustering {
      */
     public static void main(String[] args) throws Exception {
         // TODO code application logic here
-        DataSource source = new DataSource("iris.arff");
+        DataSource source = new DataSource("data.csv");
         AgnesCluster agnes = new AgnesCluster(0);        
-        MyKMeans kmeans = new MyKMeans(3);
+        MyKMeans kmeans = new MyKMeans(4);
         Instances datas = source.getDataSet();        
         //System.out.println("* " + datas.size());
         //System.out.println(datas.a);
         kmeans.buildClusterer(datas);
-        agnes.buildClusterer(datas);
+        //agnes.buildClusterer(datas);
         //System.out.println(kmeans.getAllClusters()[0].toString());
         
         System.out.println(datas.toSummaryString());
-        for (KMeansCluster cluster : kmeans.getAllClusters()) {
-            System.out.println(cluster.toString());
-        }
+        kmeans.printResult();
+
+//        System.out.println(s);
         //agnes.buildClusterer(datas);
         //ClusterTree<Instance> tes = agnes.getClusterTree();
         //tes.print("");

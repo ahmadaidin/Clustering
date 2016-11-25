@@ -144,4 +144,13 @@ public class KMeansCluster implements WeightedInstancesHandler{
         ret += "===========================\n";
         return ret;
     }
+
+    public double squareError(){
+        EuclideanDistance euclideanDistance = new EuclideanDistance(members);
+        double sError = 0;
+        for(int i= 0; i<members.numInstances(); i++) {
+            sError += euclideanDistance.distance(centroid,members.instance(i));
+        }
+        return sError;
+    }
 }

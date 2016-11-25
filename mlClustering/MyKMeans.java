@@ -60,7 +60,11 @@ public class MyKMeans extends AbstractClusterer implements Clusterer {
 	}
 
 	public void printCentroid(){
-	    System.out.println(centroids.toString());
+		System.out.println("Final Cluster Centroid");
+		for (int i =0; i<numClusters; i++){
+			System.out.print("cluster "+ i +" : ");
+			System.out.println(centroids.instance(i).toString());
+		}
     }
 
     /**
@@ -168,5 +172,20 @@ public class MyKMeans extends AbstractClusterer implements Clusterer {
             clusters[i].moveCentroid();
         }
     }
+
+    public double getSumSquareError(){
+		double sum  =0;
+		for (int i = 0; i<numClusters;i++) {
+			sum+=clusters[i].squareError();
+		}
+		return sum;
+	}
+
+	public void printResult(){
+		for (KMeansCluster cluster : clusters) {
+			System.out.println(cluster.toString());
+		}
+		System.out.print("Within cluster sum of squared errors: " + getSumSquareError());
+	}
 
 }
